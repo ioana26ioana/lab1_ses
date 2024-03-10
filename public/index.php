@@ -1,55 +1,33 @@
 <?php
+$servername = "127.0.0.1:3307"; // Replace 'localhost' with your MySQL server hostname
+$username = "root"; // Replace 'username' with your MySQL username
+$password = ""; // Replace 'password' with your MySQL password
+$database = "laravel"; // Replace 'database' with your MySQL database name
 
-use Illuminate\Contracts\Http\Kernel;
-use Illuminate\Http\Request;
+// Create connection
+$conn = new mysqli($servername, $username, $password, $database);
 
-define('LARAVEL_START', microtime(true));
-
-/*
-|--------------------------------------------------------------------------
-| Check If The Application Is Under Maintenance
-|--------------------------------------------------------------------------
-|
-| If the application is in maintenance / demo mode via the "down" command
-| we will load this file so that any pre-rendered content can be shown
-| instead of starting the framework, which could cause an exception.
-|
-*/
-
-if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php')) {
-    require $maintenance;
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
 
-/*
-|--------------------------------------------------------------------------
-| Register The Auto Loader
-|--------------------------------------------------------------------------
-|
-| Composer provides a convenient, automatically generated class loader for
-| this application. We just need to utilize it! We'll simply require it
-| into the script here so we don't need to manually load our classes.
-|
-*/
+$sql = "SELECT * FROM users";
 
-require __DIR__.'/../vendor/autoload.php';
+// Execute the query
+$result = $conn->query($sql);
 
-/*
-|--------------------------------------------------------------------------
-| Run The Application
-|--------------------------------------------------------------------------
-|
-| Once we have the application, we can handle the incoming request using
-| the application's HTTP kernel. Then, we will send the response back
-| to this client's browser, allowing them to enjoy our application.
-|
-*/
+// Check if the query returned any results
+if ($result->num_rows > 0) {
+    echo "<p>Users</p>";
+    // Loop through the results and output data
+    while($row = $result->fetch_assoc()) {
+        echo "First Name: " . $row["first_name"] . " - Last Name: " . $row["last_name"] . " - Email: " . $row["email"] . "<br>";
+    }
+} else {
+    echo "No results found";
+}
 
-$app = require_once __DIR__.'/../bootstrap/app.php';
-
-$kernel = $app->make(Kernel::class);
-
-$response = $kernel->handle(
-    $request = Request::capture()
-)->send();
-
-$kernel->terminate($request, $response);
+// Close the connection
+$conn->close();
+?>
